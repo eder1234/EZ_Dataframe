@@ -13,6 +13,7 @@ class MainApplication(tk.Frame):
     def __init__(self, master=None, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
         self.master = master
+        self.dataframe = None
         self.pack()
         self.create_widgets()
         self.tree = ttk.Treeview(self)
@@ -45,15 +46,15 @@ class MainApplication(tk.Frame):
         self.x_column_label.pack()
 
         self.x_column_var = tk.StringVar(self)
-        self.x_column_option_menu = tk.OptionMenu(self, self.x_column_var, *self.dataframe.columns)
-        self.x_column_option_menu.pack()
+        #self.x_column_option_menu = tk.OptionMenu(self, self.x_column_var, *self.dataframe.columns)
+        #self.x_column_option_menu.pack()
 
         self.y_column_label = tk.Label(self, text="Y Column:")
         self.y_column_label.pack()
 
         self.y_column_var = tk.StringVar(self)
-        self.y_column_option_menu = tk.OptionMenu(self, self.y_column_var, *self.dataframe.columns)
-        self.y_column_option_menu.pack()
+        #self.y_column_option_menu = tk.OptionMenu(self, self.y_column_var, *self.dataframe.columns)
+        #self.y_column_option_menu.pack()
 
         self.create_plot_button = tk.Button(self, text="Create Plot", command=self.create_plot)
         self.create_plot_button.pack()
@@ -61,14 +62,12 @@ class MainApplication(tk.Frame):
         self.save_button = tk.Button(self, text="Save Filtered Dataframe", command=self.save_filtered_dataframe)
         self.save_button.pack()
 
-
-
-
     def import_csv(self):
         file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         if file_path:
             self.dataframe = import_csv_to_dataframe(file_path)
             display_dataframe(self.tree, self.dataframe)
+            self.update_column_options()  # Add this line
 
     def apply_filter(self):
         filter_value = self.filter_entry.get()
@@ -96,6 +95,21 @@ class MainApplication(tk.Frame):
                     print("Filtered dataframe saved successfully.")
                 else:
                     print("Error saving filtered dataframe.")
+
+    def update_column_options(self):
+        if self.dataframe is not None:
+            column_names = list(self.dataframe.columns)
+            self.x_column_var.set(column_names[0])
+            self.x_column_option_menu['menu'].delete(0, 'end')
+            self.y_column_var.set(column_names[0])
+            self.y_column_option_menu['menu'].delete(0, 'end')
+            for column_name in column_names:
+                self.x_column_option_menu['menu'].add_command(label=column_name, command=tk._setit(self.x_column_var, column_name))
+                self.y_column_option_menu['menu'].add_command(label=column_name, command=tk._setit(self.y_column_var, column_name))
+        else:
+            self.x_column_option_menu['menu'].delete(0, 'end')
+            self.y_column_option_menu['menu'].delete(0, 'end')
+
 
 
 
